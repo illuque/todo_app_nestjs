@@ -1,29 +1,24 @@
-import {
-  Table,
-  Column,
-  Model,
-  HasMany,
-  PrimaryKey,
-} from 'sequelize-typescript';
+import { AllowNull, Column, Model, Table } from 'sequelize-typescript';
+import { DataTypes } from 'sequelize';
 
 @Table({ modelName: 'Todo' })
-export class TodoDB extends Model {
-  @PrimaryKey
-  @Column
-  id: number;
-
+export class TodoDB extends Model<TodoDB> {
+  @AllowNull(false)
   @Column
   name: string;
 
+  @AllowNull(false)
   @Column
   date: Date;
 
+  @AllowNull(false)
   @Column
   picture: string;
 
+  @AllowNull(false)
   @Column
-  createdBy: string;
+  createdBy: number;
 
-  @HasMany(() => TodoDB, 'id')
-  subTasks: TodoDB[];
+  @Column(DataTypes.ARRAY(DataTypes.STRING))
+  subTasks: string[];
 }
