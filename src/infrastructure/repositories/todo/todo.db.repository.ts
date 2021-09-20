@@ -5,18 +5,13 @@ import { TODO_REPOSITORY } from '../constants';
 import { TodoRepository } from '../../../application/ports/todo.repository';
 
 @Injectable()
-export class TodoRepositoryPostgres implements TodoRepository {
+export class TodoRepositoryDB implements TodoRepository {
   constructor(
-    @Inject(TODO_REPOSITORY) private readonly todoRepository: typeof TodoDB,
+    @Inject(TODO_REPOSITORY)
+    private readonly todoRepository: typeof TodoDB,
   ) {}
 
   async create(todo: TodoDB): Promise<TodoDB> {
-    console.log('+++++' + todo.name);
-    console.log('+++++' + todo.createdBy);
-    console.log('+++++' + todo.picture);
-    console.log('+++++' + todo.subTasks);
-    console.log('+++++' + todo.date);
-
     return await todo.save();
   }
 
