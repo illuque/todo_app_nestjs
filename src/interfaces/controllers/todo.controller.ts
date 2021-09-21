@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { TodoUseCase } from '../../application/usecase/todo.usecase';
 import { Todo } from '../../domain/todo';
 import { AuthGuard } from '@nestjs/passport';
@@ -16,6 +24,10 @@ export class TodoController {
   @UseGuards(AuthGuard('jwt'))
   @Get('/:id')
   async getTodo(@Param('id') id: number): Promise<Todo> {
-    return this.todoUseCase.findOneById(id);
+    const todo = await this.todoUseCase.findOneById(id);
+    if (!todo) {
+      throw new NotFoundException('Todo not found');
+    }
+    return todo;
   }
 }
