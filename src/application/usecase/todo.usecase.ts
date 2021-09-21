@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { TodoDB } from '../../infrastructure/repositories/todo/todo.db';
 import { Todo } from '../../domain/todo';
 import { TodoRepositoryDB } from '../../infrastructure/repositories/todo/todo.db.repository';
+import { TodoDeleteResult } from '../dto/todo.delete-result';
 
 @Injectable()
 export class TodoUseCase {
@@ -22,6 +23,7 @@ export class TodoUseCase {
 
     // TODO:I create mapper for this
     return new Todo(
+      newTodoDB.id,
       newTodoDB.name,
       newTodoDB.date,
       newTodoDB.picture,
@@ -34,13 +36,14 @@ export class TodoUseCase {
     const todosDB = await this.todoRepository.findAllByCreator(createdBy);
 
     if (!todosDB.length) {
-      return todosDB;
+      return [];
     }
 
     // TODO:I create mapper for this
     return todosDB.map(
       (todoDB) =>
         new Todo(
+          todoDB.id,
           todoDB.name,
           todoDB.date,
           todoDB.picture,
@@ -48,5 +51,23 @@ export class TodoUseCase {
           todoDB.subTasks,
         ),
     );
+  }
+
+  async deleteById(id: number, createdBy: string): Promise<TodoDeleteResult> {
+    const todoDB = await this.todoRepository.findOne(id);
+    if (!todoDB) {
+      return TodoDeleteResult.NokNotFound;
+    }
+
+    if (todoDB.createdBy !== createdBy) {
+      return TodoDeleteResult.NokForbidden;
+    }
+
+    const affectedRows = await this.todoRepository.remove(id);
+    if (!affectedRows) {
+      return TodoDeleteResult.UnknownError;
+    }
+
+    return TodoDeleteResult.Ok;
   }
 }
