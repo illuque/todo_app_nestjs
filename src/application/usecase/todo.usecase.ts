@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { TodoDB } from '../../infrastructure/repositories/todo/todo.db';
 import { Todo } from '../../domain/todo';
-import { RepositoryDB } from '../ports/repository.service';
+import { TodoRepositoryDB } from '../../infrastructure/repositories/todo/todo.db.repository';
 
 @Injectable()
 export class TodoUseCase {
-  constructor(private readonly todoRepository: RepositoryDB<number, Todo>) {}
+  constructor(private readonly todoRepository: TodoRepositoryDB) {}
 
   async create(todo: Todo): Promise<Todo> {
     // TODO:I create mapper for this

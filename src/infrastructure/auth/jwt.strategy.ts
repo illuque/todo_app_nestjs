@@ -3,11 +3,11 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JWTPayload } from './dto/auth.jwt.payload';
 import { UserDB } from '../repositories/user/user.db';
-import { RepositoryDB } from '../../application/ports/repository.service';
+import { UserRepositoryDB } from '../repositories/user/user.db.repository';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly userRepositoryDB: RepositoryDB<string, UserDB>) {
+  constructor(private readonly userRepositoryDB: UserRepositoryDB) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,

@@ -6,6 +6,7 @@ import { RepositoryDB } from '../../../application/ports/repository.service';
 
 @Injectable()
 export class UserRepositoryDB implements RepositoryDB<string, UserDB> {
+  // TODO:I extract interface
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: typeof UserDB,
