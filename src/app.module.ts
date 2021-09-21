@@ -3,7 +3,7 @@ import { TodoModule } from './infrastructure/ioc/todo.module';
 import { AuthModule } from './infrastructure/ioc/auth.module';
 
 @Module({
-  imports: [TodoModule],
+  imports: [TodoModule, AuthModule],
   controllers: [],
   providers: [],
 })
