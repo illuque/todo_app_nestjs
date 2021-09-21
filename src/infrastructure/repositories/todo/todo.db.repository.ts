@@ -19,4 +19,8 @@ export class TodoRepositoryDB implements RepositoryDB<number, TodoDB> {
   async findOne(id: number): Promise<TodoDB> {
     return await this.todoRepository.findOne<TodoDB>({ where: { id } });
   }
+
+  async findAllByCreator(createdBy: string): Promise<TodoDB[]> {
+    return await this.todoRepository.findAll<TodoDB>({ where: { createdBy } });
+  }
 }

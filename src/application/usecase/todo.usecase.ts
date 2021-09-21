@@ -7,14 +7,16 @@ import { TodoRepositoryDB } from '../../infrastructure/repositories/todo/todo.db
 export class TodoUseCase {
   constructor(private readonly todoRepository: TodoRepositoryDB) {}
 
-  async create(todo: Todo): Promise<Todo> {
+  async create(userId: string, todo: Todo): Promise<Todo> {
     // TODO:I create mapper for this
     const todoDB = new TodoDB();
+
     todoDB.name = todo.name;
     todoDB.date = todo.date;
     todoDB.picture = todo.picture;
-    todoDB.createdBy = todo.createdBy;
     todoDB.subTasks = todo.subTasks;
+
+    todoDB.createdBy = userId;
 
     const newTodoDB = await this.todoRepository.create(todoDB);
 
@@ -28,21 +30,23 @@ export class TodoUseCase {
     );
   }
 
-  async findOneById(id: number): Promise<Todo> {
-    const todoDB = await this.todoRepository.findOne(id);
+  async findAllByCreator(createdBy: string): Promise<Todo[]> {
+    const todosDB = await this.todoRepository.findAllByCreator(createdBy);
 
-    if (!todoDB) {
-      // TODO:I handle 404, etc
-      return null;
+    if (!todosDB.length) {
+      return todosDB;
     }
 
     // TODO:I create mapper for this
-    return new Todo(
-      todoDB.name,
-      todoDB.date,
-      todoDB.picture,
-      todoDB.createdBy,
-      todoDB.subTasks,
+    return todosDB.map(
+      (todoDB) =>
+        new Todo(
+          todoDB.name,
+          todoDB.date,
+          todoDB.picture,
+          todoDB.createdBy,
+          todoDB.subTasks,
+        ),
     );
   }
 }

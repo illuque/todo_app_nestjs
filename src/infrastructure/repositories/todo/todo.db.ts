@@ -19,7 +19,7 @@ export class TodoDB extends Model<TodoDB> {
 
   @AllowNull(false)
   @Column
-  createdBy: number;
+  createdBy: string;
 
   @Column(DataTypes.ARRAY(DataTypes.STRING))
   subTasks: string[];

@@ -2,14 +2,14 @@ export class Todo {
   readonly name: string;
   readonly date: Date;
   readonly picture: string;
-  readonly createdBy: number;
+  readonly createdBy: string;
   readonly subTasks: string[];
 
   constructor(
     name: string,
     date: Date,
     picture: string,
-    createdBy: number,
+    createdBy: string,
     subtasks: string[],
   ) {
     this.name = name;
