@@ -17,14 +17,21 @@ export class TodoRepositoryDB implements RepositoryDB<number, TodoDB> {
   }
 
   async findOne(id: number): Promise<TodoDB> {
+    // TODO:I ver de llamar a los métodos estáticos en vez de a todoRepository
     return await this.todoRepository.findOne<TodoDB>({ where: { id } });
   }
 
   async findAllByCreator(createdBy: string): Promise<TodoDB[]> {
+    // TODO:I ver de llamar a los métodos estáticos en vez de a todoRepository
     return await this.todoRepository.findAll<TodoDB>({ where: { createdBy } });
   }
 
   async remove(id: number): Promise<number> {
+    // TODO:I ver de llamar a los métodos estáticos en vez de a todoRepository
     return await this.todoRepository.destroy<TodoDB>({ where: { id } });
+  }
+
+  async update(todoDB: TodoDB): Promise<TodoDB> {
+    return todoDB.save();
   }
 }
