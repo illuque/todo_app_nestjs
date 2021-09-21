@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { TodoDB } from '../../infrastructure/repositories/todo/todo.db';
 import { Todo } from '../../domain/todo';
-import { TodoRepository } from '../ports/todo.repository';
+import { RepositoryDB } from '../ports/repository.service';
 
 @Injectable()
 export class TodoUseCase {
-  constructor(private readonly todoRepository: TodoRepository) {}
+  constructor(private readonly todoRepository: RepositoryDB<number, Todo>) {}
 
   async create(todo: Todo): Promise<Todo> {
     // TODO:I create mapper for this
@@ -30,6 +30,11 @@ export class TodoUseCase {
 
   async findOneById(id: number): Promise<Todo> {
     const todoDB = await this.todoRepository.findOne(id);
+
+    if (!todoDB) {
+      // TODO:I handle 404, etc
+      return null;
+    }
 
     // TODO:I create mapper for this
     return new Todo(

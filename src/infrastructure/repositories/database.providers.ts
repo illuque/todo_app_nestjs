@@ -1,13 +1,8 @@
 import { Sequelize } from 'sequelize-typescript';
 import { TodoDB } from './todo/todo.db';
-import {
-  DATABASE,
-  DIALECT,
-  HOST,
-  PASSWORD,
-  PORT,
-  USERNAME,
-} from '../setup/postgres/constants';
+
+import { UserDB } from './user/user.db';
+import { DATABASE, DIALECT, HOST, PASSWORD, PORT, USERNAME } from './constants';
 
 export const databaseProviders = [
   {
@@ -21,8 +16,8 @@ export const databaseProviders = [
         password: PASSWORD,
         database: DATABASE,
       });
-      sequelize.addModels([TodoDB]);
-      await sequelize.sync();
+      sequelize.addModels([TodoDB, UserDB]);
+      //await sequelize.sync();
       return sequelize;
     },
   },

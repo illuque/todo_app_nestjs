@@ -1,17 +1,20 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { TodoUseCase } from '../../application/usecase/todo.usecase';
 import { Todo } from '../../domain/todo';
+import { AuthGuard } from '@nestjs/passport';
 
-@Controller()
+@Controller('todo')
 export class TodoController {
   constructor(private readonly todoUseCase: TodoUseCase) {}
 
-  @Post('todo')
+  @UseGuards(AuthGuard('jwt'))
+  @Post()
   async createTodo(@Body() todo: Todo) {
     return this.todoUseCase.create(todo);
   }
 
-  @Get('todo/:id')
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/:id')
   async getTodo(@Param('id') id: number): Promise<Todo> {
     return this.todoUseCase.findOneById(id);
   }

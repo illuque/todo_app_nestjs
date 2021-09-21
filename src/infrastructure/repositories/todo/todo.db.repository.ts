@@ -2,10 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { TodoDB } from './todo.db';
 import { TODO_REPOSITORY } from '../constants';
-import { TodoRepository } from '../../../application/ports/todo.repository';
+import { RepositoryDB } from '../../../application/ports/repository.service';
 
 @Injectable()
-export class TodoRepositoryDB implements TodoRepository {
+export class TodoRepositoryDB implements RepositoryDB<number, TodoDB> {
   constructor(
     @Inject(TODO_REPOSITORY)
     private readonly todoRepository: typeof TodoDB,

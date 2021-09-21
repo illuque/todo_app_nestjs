@@ -3,6 +3,8 @@ import { DataTypes } from 'sequelize';
 
 @Table({ modelName: 'Todo' })
 export class TodoDB extends Model<TodoDB> {
+  // TODO:I todoRepository throws error if I add constructor to this class, investigate!
+
   @AllowNull(false)
   @Column
   name: string;

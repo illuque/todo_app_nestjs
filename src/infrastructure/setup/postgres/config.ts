@@ -1,12 +1,10 @@
-import { DATABASE, DIALECT, HOST, PASSWORD, PORT, USERNAME } from './constants';
-
 module.exports = {
   development: {
-    dialect: DIALECT,
-    host: HOST,
-    port: PORT,
-    username: USERNAME,
-    password: PASSWORD,
-    database: DATABASE,
+    dialect: 'postgres',
+    host: 'localhost',
+    port: 5432,
+    username: 'admin',
+    password: 'admin',
+    database: 'todo_app',
   },
 };
