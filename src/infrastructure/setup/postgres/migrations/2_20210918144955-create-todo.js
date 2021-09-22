@@ -25,6 +25,10 @@ module.exports = {
       createdBy: {
         type: Sequelize.STRING,
         allowNull: false,
+        references: {
+          model: 'Users',
+          key: 'id',
+        },
       },
       subTasks: {
         type: Sequelize.STRING,

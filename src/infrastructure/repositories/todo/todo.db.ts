@@ -1,5 +1,12 @@
-import { AllowNull, Column, Model, Table } from 'sequelize-typescript';
+import {
+  AllowNull,
+  Column,
+  ForeignKey,
+  Model,
+  Table,
+} from 'sequelize-typescript';
 import { DataTypes } from 'sequelize';
+import { UserDB } from '../user/user.db';
 
 @Table({ modelName: 'Todo' })
 export class TodoDB extends Model<TodoDB> {
@@ -18,6 +25,7 @@ export class TodoDB extends Model<TodoDB> {
   picture: string;
 
   @AllowNull(false)
+  @ForeignKey(() => UserDB)
   @Column
   createdBy: string;
 
