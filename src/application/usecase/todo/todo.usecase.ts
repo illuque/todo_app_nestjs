@@ -96,6 +96,26 @@ export class TodoUseCase {
     return TodoUseCaseResult.CreateOk(todoUpdated);
   }
 
+  async setPicture(
+    todoId: number,
+    loggedUserId: string,
+    pictureId: string,
+  ): Promise<TodoUseCaseResult> {
+    const todoDB = await this.todoRepository.findOne(todoId);
+
+    const rejectReason = TodoUseCase.validateOwner(todoDB, loggedUserId);
+    if (rejectReason) {
+      return rejectReason;
+    }
+
+    todoDB.picture = pictureId;
+    const todoDBUpdated = await this.todoRepository.update(todoDB);
+
+    const todoUpdated = TodoConverter.fromDB(todoDBUpdated);
+
+    return TodoUseCaseResult.CreateOk(todoUpdated);
+  }
+
   private static validateOwner(
     todoDB: TodoDB,
     loggedUserId: string,

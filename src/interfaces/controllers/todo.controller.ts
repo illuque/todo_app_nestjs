@@ -13,11 +13,17 @@ import {
   Patch,
   Post,
   Request,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { extname } from 'path';
+import { diskStorage } from 'multer';
 import { TodoUseCase } from '../../application/usecase/todo/todo.usecase';
 import { Todo } from '../../domain/todo';
 import { UseCaseError } from '../../application/usecase/common/dto/usecase.errors';
 import { TodoAddTaskDto } from './dto/todo.add-task.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { PICTURES_PATH } from '../../infrastructure/constants';
 
 @Controller('todos')
 export class TodoController {
@@ -81,7 +87,7 @@ export class TodoController {
     @Request() req,
     @Param('id') todoId: number,
     @Body() taskDto: TodoAddTaskDto, // TODO:I create DTO
-  ) {
+  ): Promise<Todo> {
     const createTaskResult = await this.todoUseCase.addTask(
       todoId,
       req.user.id,
@@ -98,6 +104,29 @@ export class TodoController {
     );
   }
 
+  @Post('/:id/picture')
+  @UseInterceptors(FileInterceptor('file', { storage: buildDiskStorage() }))
+  async setPicture(
+    @Request() req,
+    @Param('id') todoId,
+    @UploadedFile() file,
+  ): Promise<Todo> {
+    const setPictureResult = await this.todoUseCase.setPicture(
+      todoId,
+      req.user.id,
+      file.filename,
+    );
+
+    if (setPictureResult.isOk()) {
+      return setPictureResult.getObject();
+    }
+
+    TodoController.throwHttpException(
+      setPictureResult.getError(),
+      setPictureResult.getMessage(),
+    );
+  }
+
   private static throwHttpException(error: UseCaseError, message: string) {
     switch (error) {
       case UseCaseError.Forbidden:
@@ -110,4 +139,21 @@ export class TodoController {
         throw new InternalServerErrorException(message || 'Unknown error');
     }
   }
+}
+
+function getFilename() {
+  return (req, file, cb) => {
+    const randomName = Array(32)
+      .fill(null)
+      .map(() => Math.round(Math.random() * 16).toString(16))
+      .join('');
+    return cb(null, `${randomName}${extname(file.originalname)}`);
+  };
+}
+
+function buildDiskStorage() {
+  return diskStorage({
+    destination: `./${PICTURES_PATH}`,
+    filename: getFilename(),
+  });
 }
