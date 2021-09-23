@@ -4,6 +4,7 @@ import { TodoRepositoryDB } from '../../../infrastructure/repositories/todo/todo
 import { TodoUseCaseDeleteResultDto } from './dto/todo.usecase.delete-result.dto';
 import { TodoUseCaseResult } from './dto/todo.usecase.result';
 import { TodoConverter } from '../../converters/todo.converter';
+import { TodoDB } from '../../../infrastructure/repositories/todo/todo.db';
 
 @Injectable()
 export class TodoUseCase {
@@ -46,16 +47,13 @@ export class TodoUseCase {
   async update(
     todoId: number,
     loggedUserId: string,
-    todo: Todo,
+    todo: Todo, // TODO:I DTO
   ): Promise<TodoUseCaseResult> {
     const todoDB = await this.todoRepository.findOne(todoId);
 
-    if (!todoDB) {
-      return TodoUseCaseResult.CreateErrorNotFound();
-    }
-
-    if (todoDB.createdBy !== loggedUserId) {
-      return TodoUseCaseResult.CreateErrorForbidden();
+    const rejectReason = TodoUseCase.validateOwner(todoDB, loggedUserId);
+    if (rejectReason) {
+      return rejectReason;
     }
 
     todoDB.name = todo.name || todoDB.name;
@@ -70,5 +68,46 @@ export class TodoUseCase {
     const todoUpdated = TodoConverter.fromDB(todoDBUpdated);
 
     return TodoUseCaseResult.CreateOk(todoUpdated);
+  }
+
+  async addTask(
+    todoId: number,
+    loggedUserId: string,
+    task: string,
+  ): Promise<TodoUseCaseResult> {
+    const todoDB = await this.todoRepository.findOne(todoId);
+
+    const rejectReason = TodoUseCase.validateOwner(todoDB, loggedUserId);
+    if (rejectReason) {
+      return rejectReason;
+    }
+
+    if (todoDB.subTasks.includes(task)) {
+      return TodoUseCaseResult.CreateBadRequest('Duplicated task');
+    }
+
+    const todoDBUpdated = await this.todoRepository.addTask(todoId, task);
+    if (!todoDBUpdated) {
+      return TodoUseCaseResult.CreateErrorUnknown();
+    }
+
+    const todoUpdated = TodoConverter.fromDB(todoDBUpdated);
+
+    return TodoUseCaseResult.CreateOk(todoUpdated);
+  }
+
+  private static validateOwner(
+    todoDB: TodoDB,
+    loggedUserId: string,
+  ): TodoUseCaseResult {
+    if (!todoDB) {
+      return TodoUseCaseResult.CreateErrorNotFound();
+    }
+
+    if (todoDB.createdBy !== loggedUserId) {
+      return TodoUseCaseResult.CreateErrorForbidden();
+    }
+
+    return null;
   }
 }

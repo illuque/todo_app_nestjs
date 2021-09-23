@@ -3,6 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { TodoDB } from './todo.db';
 import { TODO_REPOSITORY } from '../constants';
 import { RepositoryDB } from '../../../application/ports/repository.service';
+import sequelize from 'sequelize';
 
 @Injectable()
 export class TodoRepositoryDB implements RepositoryDB<number, TodoDB> {
@@ -32,6 +33,21 @@ export class TodoRepositoryDB implements RepositoryDB<number, TodoDB> {
   }
 
   async update(todoDB: TodoDB): Promise<TodoDB> {
-    return todoDB.save();
+    return await todoDB.save();
+  }
+
+  async addTask(todoId: number, task: string): Promise<TodoDB> {
+    const rowsUpdated = await this.todoRepository.update<TodoDB>(
+      {
+        subTasks: sequelize.fn('array_append', sequelize.col('subTasks'), task),
+      },
+      { where: { id: todoId } },
+    );
+
+    if (rowsUpdated) {
+      return this.findOne(todoId);
+    }
+
+    return null;
   }
 }

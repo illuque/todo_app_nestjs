@@ -31,7 +31,7 @@ module.exports = {
         },
       },
       subTasks: {
-        type: Sequelize.STRING,
+        type: Sequelize.ARRAY(Sequelize.STRING),
         allowNull: true,
       },
       createdAt: {

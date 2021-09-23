@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -16,6 +17,7 @@ import {
 import { TodoUseCase } from '../../application/usecase/todo/todo.usecase';
 import { Todo } from '../../domain/todo';
 import { UseCaseError } from '../../application/usecase/common/dto/usecase.errors';
+import { TodoAddTaskDto } from './dto/todo.add-task.dto';
 
 @Controller('todos')
 export class TodoController {
@@ -46,7 +48,10 @@ export class TodoController {
       return;
     }
 
-    TodoController.throwHttpException(deleteResult.getError());
+    TodoController.throwHttpException(
+      deleteResult.getError(),
+      deleteResult.getMessage(),
+    );
   }
 
   @Patch('/:id')
@@ -65,17 +70,44 @@ export class TodoController {
       return updateResult.getObject();
     }
 
-    TodoController.throwHttpException(updateResult.getError());
+    TodoController.throwHttpException(
+      updateResult.getError(),
+      updateResult.getMessage(),
+    );
   }
 
-  private static throwHttpException(error: UseCaseError) {
+  @Post('/:id/task')
+  async createTask(
+    @Request() req,
+    @Param('id') todoId: number,
+    @Body() taskDto: TodoAddTaskDto, // TODO:I create DTO
+  ) {
+    const createTaskResult = await this.todoUseCase.addTask(
+      todoId,
+      req.user.id,
+      taskDto.task,
+    );
+
+    if (createTaskResult.isOk()) {
+      return createTaskResult.getObject();
+    }
+
+    TodoController.throwHttpException(
+      createTaskResult.getError(),
+      createTaskResult.getMessage(),
+    );
+  }
+
+  private static throwHttpException(error: UseCaseError, message: string) {
     switch (error) {
       case UseCaseError.Forbidden:
-        throw new ForbiddenException('User not allowed');
+        throw new ForbiddenException(message || 'User not allowed');
+      case UseCaseError.BadRequest:
+        throw new BadRequestException(message || 'Invalid request');
       case UseCaseError.NotFound:
-        throw new NotFoundException('Todo not found');
+        throw new NotFoundException(message || 'Todo not found');
       case UseCaseError.Unknown:
-        throw new InternalServerErrorException('Unknown error');
+        throw new InternalServerErrorException(message || 'Unknown error');
     }
   }
 }
