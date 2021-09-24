@@ -1,131 +1,172 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Todo } from '../../../domain/todo';
 import { TodoRepositoryDB } from '../../../infrastructure/repositories/todo/todo.db.repository';
-import { TodoUseCaseDeleteResultDto } from './dto/todo.usecase.delete-result.dto';
-import { TodoUseCaseResult } from './dto/todo.usecase.result';
 import { TodoConverter } from '../../converters/todo.converter';
 import { TodoDB } from '../../../infrastructure/repositories/todo/todo.db';
+import {
+  TodoNotFoundError,
+  TodoUnknownError,
+  TodoNotOwnedByUserError,
+  TodoNotUpdatableError,
+} from './todo.usecase.errors';
 
 @Injectable()
 export class TodoUseCase {
+  private readonly logger = new Logger(TodoUseCase.name);
+
   // TODO:I Dividir en varias clases
   constructor(private readonly todoRepository: TodoRepositoryDB) {}
 
   // TODO:I create usecase DTO
   async create(loggedUserId: string, todo: Todo): Promise<Todo> {
+    // TODO:I validate required fields on input
+
     const todoDB = TodoConverter.toDB(todo, loggedUserId);
-    const todoDBCreated = await this.todoRepository.create(todoDB); // TODO:I catch possible exception?
-    return TodoConverter.fromDB(todoDBCreated);
+    try {
+      const todoDBCreated = await this.todoRepository.create(todoDB); // TODO:I catch possible exceptions here and everywhere?
+      return TodoConverter.fromDB(todoDBCreated);
+    } catch (e) {
+      this.logger.error('Error creating Todo', e);
+      throw new TodoUnknownError('Unknown error creating Todo');
+    }
   }
 
-  async findAllByCreator(createdBy: string): Promise<Todo[]> {
-    const todosDB = await this.todoRepository.findAllByCreator(createdBy);
-    return todosDB.map((todoDB) => TodoConverter.fromDB(todoDB));
+  async findAllByCreator(userId: string): Promise<Todo[]> {
+    try {
+      const todosDB = await this.todoRepository.findAllByCreator(userId);
+      return todosDB.map((todoDB) => TodoConverter.fromDB(todoDB));
+    } catch (e) {
+      this.logger.error('Error getting user Todos', e);
+      throw new TodoUnknownError(`Unknown error getting user ${userId} Todos`);
+    }
   }
 
-  async deleteById(
-    id: number,
-    loggedUserId: string,
-  ): Promise<TodoUseCaseDeleteResultDto> {
-    const todoDB = await this.todoRepository.findOne(id);
-    if (!todoDB) {
-      return TodoUseCaseDeleteResultDto.CreateErrorNotFound();
+  async deleteById(id: number, userId: string): Promise<void> {
+    let todoDB;
+    try {
+      todoDB = await this.todoRepository.findOne(id);
+    } catch (e) {
+      this.logger.error(`Error getting Todo ${id} from user ${userId} before deleting`);
+      throw new TodoUnknownError('Unknown error deleting Todo');
     }
 
-    if (todoDB.createdBy !== loggedUserId) {
-      return TodoUseCaseDeleteResultDto.CreateErrorForbidden();
-    }
+    TodoUseCase.validateOwner(todoDB, userId);
 
     const affectedRows = await this.todoRepository.remove(id);
-    if (!affectedRows) {
-      return TodoUseCaseDeleteResultDto.CreateErrorUnknown();
+    if (affectedRows === 0) {
+      this.logger.error(`Unknown error deleting Todo ${id} from user ${userId}, it should exist after previous find`);
+      throw new TodoUnknownError('Unknown error deleting Todo');
     }
 
-    return TodoUseCaseDeleteResultDto.CreateOk();
+    return;
   }
 
-  async update(
-    todoId: number,
-    loggedUserId: string,
-    todo: Todo, // TODO:I DTO
-  ): Promise<TodoUseCaseResult> {
-    const todoDB = await this.todoRepository.findOne(todoId);
-
-    const rejectReason = TodoUseCase.validateOwner(todoDB, loggedUserId);
-    if (rejectReason) {
-      return rejectReason;
+  async update(id: number, userId: string, todo: Todo): Promise<Todo> {
+    // TODO:I DTO
+    // TODO:I validate required fields on input
+    let todoDB;
+    try {
+      todoDB = await this.todoRepository.findOne(id);
+    } catch (e) {
+      this.logger.error(`Unknown error getting Todo ${id} from user ${userId} for update`);
+      throw new TodoUnknownError(`Unknown error updating Todo`);
     }
+
+    TodoUseCase.validateOwner(todoDB, userId);
 
     todoDB.name = todo.name || todoDB.name;
     todoDB.picture = todo.picture || todoDB.picture;
     todoDB.date = todo.date || todoDB.date;
 
-    const todoDBUpdated = await this.todoRepository.update(todoDB);
-    if (!todoDBUpdated) {
-      return TodoUseCaseResult.CreateErrorUnknown();
+    let todoDBUpdated;
+    try {
+      todoDBUpdated = await this.todoRepository.update(todoDB);
+      if (!todoDBUpdated) {
+        this.logger.error(`Unknown error updating Todo ${id} from user ${userId}: repository returned "no update"`);
+      }
+    } catch (e) {
+      this.logger.error(`Unknown error updating Todo ${id} from user ${userId}: repository threw exception"`, e);
     }
 
-    const todoUpdated = TodoConverter.fromDB(todoDBUpdated);
+    if (!todoDBUpdated) {
+      throw new TodoUnknownError(`Unknown error updating Todo`);
+    }
 
-    return TodoUseCaseResult.CreateOk(todoUpdated);
+    return TodoConverter.fromDB(todoDBUpdated);
   }
 
-  async addTask(
-    todoId: number,
-    loggedUserId: string,
-    task: string,
-  ): Promise<TodoUseCaseResult> {
-    const todoDB = await this.todoRepository.findOne(todoId);
-
-    const rejectReason = TodoUseCase.validateOwner(todoDB, loggedUserId);
-    if (rejectReason) {
-      return rejectReason;
+  async addTask(id: number, userId: string, task: string) {
+    let todoDB;
+    try {
+      todoDB = await this.todoRepository.findOne(id);
+    } catch (e) {
+      this.logger.error(`Unknown error getting Todo ${id} from user ${userId} for addTask`);
+      throw new TodoUnknownError(`Unknown error adding task to Todo`);
     }
+
+    TodoUseCase.validateOwner(todoDB, userId);
 
     if (todoDB.subTasks.includes(task)) {
-      return TodoUseCaseResult.CreateBadRequest('Duplicated task');
+      throw new TodoNotUpdatableError('Duplicated task');
     }
 
-    const todoDBUpdated = await this.todoRepository.addTask(todoId, task);
+    let todoDBUpdated;
+    try {
+      todoDBUpdated = await this.todoRepository.addTask(id, task);
+      if (!todoDBUpdated) {
+        this.logger.error(
+          `Unknown error adding task to Todo ${id} from user ${userId}: repository returned "no update"`,
+        );
+      }
+    } catch (e) {
+      this.logger.error(`Unknown error updating Todo ${id} from user ${userId}: repository threw exception"`, e);
+    }
+
     if (!todoDBUpdated) {
-      return TodoUseCaseResult.CreateErrorUnknown();
+      throw new TodoUnknownError('Unknown error adding task to Todo');
     }
-
-    const todoUpdated = TodoConverter.fromDB(todoDBUpdated);
-
-    return TodoUseCaseResult.CreateOk(todoUpdated);
   }
 
-  async setPicture(
-    todoId: number,
-    loggedUserId: string,
-    pictureId: string,
-  ): Promise<TodoUseCaseResult> {
-    const todoDB = await this.todoRepository.findOne(todoId);
-
-    const rejectReason = TodoUseCase.validateOwner(todoDB, loggedUserId);
-    if (rejectReason) {
-      return rejectReason;
+  async setPicture(id: number, userId: string, pictureId: string) {
+    let todoDB;
+    try {
+      todoDB = await this.todoRepository.findOne(id);
+    } catch (e) {
+      this.logger.error(`Unknown error getting Todo ${id} from user ${userId} for setPicture`);
+      throw new TodoUnknownError(`Unknown error setting picture to Todo`);
     }
+
+    TodoUseCase.validateOwner(todoDB, userId);
 
     todoDB.picture = pictureId;
-    const todoDBUpdated = await this.todoRepository.update(todoDB);
 
-    const todoUpdated = TodoConverter.fromDB(todoDBUpdated);
-
-    return TodoUseCaseResult.CreateOk(todoUpdated);
-  }
-
-  private static validateOwner(
-    todoDB: TodoDB,
-    loggedUserId: string,
-  ): TodoUseCaseResult {
-    if (!todoDB) {
-      return TodoUseCaseResult.CreateErrorNotFound();
+    let todoDBUpdated;
+    try {
+      todoDBUpdated = await this.todoRepository.update(todoDB);
+      if (!todoDBUpdated) {
+        this.logger.error(
+          `Unknown error setting picture to Todo ${id} from user ${userId}: repository returned "no update"`,
+        );
+      }
+    } catch (e) {
+      this.logger.error(
+        `Unknown error setting picture to Todo ${id} from user ${userId}: repository threw exception"`,
+        e,
+      );
     }
 
-    if (todoDB.createdBy !== loggedUserId) {
-      return TodoUseCaseResult.CreateErrorForbidden();
+    if (!todoDBUpdated) {
+      throw new TodoUnknownError('Unknown error setting picture to Todo');
+    }
+  }
+
+  private static validateOwner(todoDB: TodoDB, userId: string) {
+    if (!todoDB) {
+      throw new TodoNotFoundError(`Could not find Todo ${todoDB.id}`);
+    }
+
+    if (todoDB.createdBy !== userId) {
+      throw new TodoNotOwnedByUserError(`User ${userId} does not own ${todoDB.id}`);
     }
 
     return null;

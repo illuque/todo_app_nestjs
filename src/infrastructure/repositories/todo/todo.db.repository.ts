@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { TodoDB } from './todo.db';
 import { TODO_REPOSITORY } from '../constants';
 import { RepositoryDB } from '../../../application/ports/repository.service';
-import sequelize from 'sequelize';
+import sequelize, { ValidationError } from 'sequelize';
 
 @Injectable()
 export class TodoRepositoryDB implements RepositoryDB<number, TodoDB> {
@@ -13,8 +13,12 @@ export class TodoRepositoryDB implements RepositoryDB<number, TodoDB> {
     private readonly todoRepository: typeof TodoDB,
   ) {}
 
+  // TODO:I todas estas tienen q devolver un Todo de dominio!!!
+
   async create(todo: TodoDB): Promise<TodoDB> {
-    return await todo.save();
+    try {
+      return await todo.save();
+    } catch (ve) {}
   }
 
   async findOne(id: number): Promise<TodoDB> {

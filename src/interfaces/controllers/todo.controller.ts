@@ -20,20 +20,23 @@ import { extname } from 'path';
 import { diskStorage } from 'multer';
 import { TodoUseCase } from '../../application/usecase/todo/todo.usecase';
 import { Todo } from '../../domain/todo';
-import { UseCaseError } from '../../application/usecase/common/dto/usecase.errors';
 import { TodoAddTaskDto } from './dto/todo.add-task.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PICTURES_PATH } from '../../infrastructure/constants';
+import {
+  TodoNotFoundError,
+  TodoNotOwnedByUserError,
+  TodoNotUpdatableError,
+  TodoUnknownError,
+} from '../../application/usecase/todo/todo.usecase.errors';
 
 @Controller('todos')
 export class TodoController {
   constructor(private readonly todoUseCase: TodoUseCase) {}
 
   @Post()
-  async create(
-    @Request() req,
-    @Body() todo: Todo, // TODO:I create DTO
-  ) {
+  async create(@Request() req, @Body() todo: Todo) {
+    // TODO:I create DTO
     return this.todoUseCase.create(req.user.id, todo);
   }
 
@@ -49,94 +52,58 @@ export class TodoController {
   @Delete('/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Request() req, @Param('id') todoId: number) {
-    const deleteResult = await this.todoUseCase.deleteById(todoId, req.user.id);
-    if (deleteResult.isOk()) {
-      return;
+    try {
+      await this.todoUseCase.deleteById(todoId, req.user.id);
+    } catch (e) {
+      throw TodoController.throwHttpException(e);
     }
-
-    TodoController.throwHttpException(
-      deleteResult.getError(),
-      deleteResult.getMessage(),
-    );
   }
 
   @Patch('/:id')
-  async patch(
-    @Request() req,
-    @Param('id') todoId: number,
-    @Body() todo: Todo, // TODO:I create DTO
-  ): Promise<Todo> {
-    const updateResult = await this.todoUseCase.update(
-      // TODO:I crear ValueObjects para los input del DTO?
-      todoId,
-      req.user.id,
-      todo,
-    );
-    if (updateResult.isOk()) {
-      return updateResult.getObject();
+  async patch(@Request() req, @Param('id') todoId: number, @Body() todo: Todo): Promise<Todo> {
+    // TODO:I create DTO
+    // TODO:I crear ValueObjects para los input del DTO?
+    try {
+      return await this.todoUseCase.update(todoId, req.user.id, todo);
+    } catch (e) {
+      throw TodoController.throwHttpException(e);
     }
-
-    TodoController.throwHttpException(
-      updateResult.getError(),
-      updateResult.getMessage(),
-    );
   }
 
   @Post('/:id/task')
-  async createTask(
-    @Request() req,
-    @Param('id') todoId: number,
-    @Body() taskDto: TodoAddTaskDto, // TODO:I create DTO
-  ): Promise<Todo> {
-    const createTaskResult = await this.todoUseCase.addTask(
-      todoId,
-      req.user.id,
-      taskDto.task,
-    );
-
-    if (createTaskResult.isOk()) {
-      return createTaskResult.getObject();
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async createTask(@Request() req, @Param('id') todoId: number, @Body() taskDto: TodoAddTaskDto) {
+    // TODO:I create DTO
+    try {
+      await this.todoUseCase.addTask(todoId, req.user.id, taskDto.task);
+    } catch (e) {
+      throw TodoController.throwHttpException(e);
     }
-
-    TodoController.throwHttpException(
-      createTaskResult.getError(),
-      createTaskResult.getMessage(),
-    );
   }
 
   @Post('/:id/picture')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseInterceptors(FileInterceptor('file', { storage: buildDiskStorage() }))
-  async setPicture(
-    @Request() req,
-    @Param('id') todoId,
-    @UploadedFile() file,
-  ): Promise<Todo> {
-    const setPictureResult = await this.todoUseCase.setPicture(
-      todoId,
-      req.user.id,
-      file.filename,
-    );
-
-    if (setPictureResult.isOk()) {
-      return setPictureResult.getObject();
+  async setPicture(@Request() req, @Param('id') todoId, @UploadedFile() file) {
+    try {
+      await this.todoUseCase.setPicture(todoId, req.user.id, file.filename);
+    } catch (e) {
+      throw TodoController.throwHttpException(e);
     }
-
-    TodoController.throwHttpException(
-      setPictureResult.getError(),
-      setPictureResult.getMessage(),
-    );
   }
 
-  private static throwHttpException(error: UseCaseError, message: string) {
-    switch (error) {
-      case UseCaseError.Forbidden:
-        throw new ForbiddenException(message || 'User not allowed');
-      case UseCaseError.BadRequest:
-        throw new BadRequestException(message || 'Invalid request');
-      case UseCaseError.NotFound:
-        throw new NotFoundException(message || 'Todo not found');
-      case UseCaseError.Unknown:
-        throw new InternalServerErrorException(message || 'Unknown error');
+  private static throwHttpException(error: Error): Error {
+    switch (error.constructor) {
+      case TodoNotFoundError:
+        return new NotFoundException(error.message);
+      case TodoNotOwnedByUserError:
+        return new ForbiddenException(error.message);
+      case TodoNotUpdatableError:
+        return new BadRequestException(error.message);
+      case TodoUnknownError:
+        return new InternalServerErrorException(error.message);
+      default:
+        return new InternalServerErrorException('Unknown error happened');
     }
   }
 }
