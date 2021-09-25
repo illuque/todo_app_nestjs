@@ -1,7 +1,7 @@
 const path = require('path');
 module.exports = {
-   'seeders-path': path.resolve('src/infrastructure/setup/postgres', 'seeders'),
-   'migrations-path': path.resolve('src/infrastructure/setup/postgres', 'migrations'),
-   'config': path.resolve('src/infrastructure/setup/postgres', 'config.ts'),
-   'models-path': path.resolve('src/infrastructure/setup/postgres', 'models'),
+   'seeders-path': path.resolve('setup/postgres', 'seeders'),
+   'migrations-path': path.resolve('setup/postgres', 'migrations'),
+   'config': path.resolve('setup/postgres', 'config.ts'),
+   'models-path': path.resolve('setup/postgres', 'models'),
 }

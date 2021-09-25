@@ -30,3 +30,5 @@ services:
 networks:
   postgres:
     driver: bridge
+
+# TODO:I docker-compose should also run the app!!!
