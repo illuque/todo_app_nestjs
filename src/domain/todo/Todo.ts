@@ -21,11 +21,11 @@ export class Todo {
   // being an array it will be modifiable any way, but at least this is a hint on using the addTask method
   private _subTasks: Task[];
 
-  static CreateNew(name: string, date: Date, createdBy: UserId): Todo {
+  static createNew(name: string, date: Date, createdBy: UserId): Todo {
     return new Todo(null, name, date, null, createdBy, []);
   }
 
-  static CreateExisting(
+  static createExisting(
     id: TodoId,
     name: string,
     date: Date,

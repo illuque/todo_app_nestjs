@@ -18,17 +18,17 @@ const userId = new UserId('userId');
 describe('Todo', () => {
   describe('CreateNew', () => {
     it('should reject names with less than 8 digits', async () => {
-      expect(() => Todo.CreateNew(invalidNameShort, validDate, userId)).toThrow(InvalidTodoNameError);
+      expect(() => Todo.createNew(invalidNameShort, validDate, userId)).toThrow(InvalidTodoNameError);
     });
     it('should reject names with more than 16 digits', async () => {
-      expect(() => Todo.CreateNew(invalidNameLong, validDate, userId)).toThrow(InvalidTodoNameError);
+      expect(() => Todo.createNew(invalidNameLong, validDate, userId)).toThrow(InvalidTodoNameError);
     });
     it('should reject weekend date', async () => {
-      expect(() => Todo.CreateNew(validName, invalidDate, userId)).toThrow(InvalidTodoDateError);
+      expect(() => Todo.createNew(validName, invalidDate, userId)).toThrow(InvalidTodoDateError);
     });
     it('should create when valid input', async () => {
       const name = 'valid name';
-      const todo = Todo.CreateNew(name, validDate, userId);
+      const todo = Todo.createNew(name, validDate, userId);
 
       expect(todo.name).toEqual(name);
       expect(todo.date).toEqual(validDate);

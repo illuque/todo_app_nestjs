@@ -7,7 +7,7 @@ import { TodoId } from '../../../domain/todo/TodoId';
 
 export class TodoDBConverter {
   static fromDB(todoDB: TodoDB): Todo {
-    return Todo.CreateExisting(
+    return Todo.createExisting(
       new TodoId(todoDB.id),
       todoDB.name,
       todoDB.date,

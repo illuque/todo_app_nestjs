@@ -13,7 +13,7 @@ export class CreateTodoUseCase implements TodoUseCase<Input, Todo> {
 
   async run(input: Input): Promise<Todo> {
     try {
-      const todo = Todo.CreateNew(input.name, input.date, input.userId);
+      const todo = Todo.createNew(input.name, input.date, input.userId);
       return await this.todoRepository.create(todo);
     } catch (e) {
       this.logger.error('Error creating Todo', e.stack);

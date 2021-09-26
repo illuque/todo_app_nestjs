@@ -44,7 +44,7 @@ export class TodoController {
   @Post()
   async create(@Request() req, @Body() input: CreateOrUpdateTodoInput): Promise<TodoREST> {
     try {
-      const userId = new UserId(req.user.id);
+      const userId: UserId = req.user.id;
       const todo = await this.createUseCase.run({
         userId,
         name: input.name,
@@ -59,7 +59,7 @@ export class TodoController {
   @Get()
   async getAllForUser(@Request() req): Promise<TodoREST[]> {
     try {
-      const userId = new UserId(req.user.id);
+      const userId: UserId = req.user.id;
       const todos = await this.getAllByUserUseCase.run(userId);
       return TodoRESTConverter.fromMulti(todos);
     } catch (e) {
@@ -72,7 +72,7 @@ export class TodoController {
   async delete(@Request() req, @Param('id') id: number): Promise<void> {
     try {
       const todoId = new TodoId(id);
-      const userId = new UserId(req.user.id);
+      const userId: UserId = req.user.id;
       await this.deleteUseCase.run({ todoId, userId });
     } catch (e) {
       throw HttpErrorHandler.buildHttpExceptionFromDomainError(e);
@@ -82,12 +82,11 @@ export class TodoController {
   @Patch('/:id')
   async update(@Request() req, @Param('id') id: number, @Body() input: CreateOrUpdateTodoInput): Promise<TodoREST> {
     try {
-      const todo = await this.updateUseCase.run({
-        todoId: new TodoId(id),
-        userId: new UserId(req.user.id),
-        newName: input.name,
-        newDate: new Date(input.date),
-      });
+      const todoId = new TodoId(id);
+      const userId = req.user.id;
+      const newName = input.name;
+      const newDate = new Date(input.date);
+      const todo = await this.updateUseCase.run({ todoId, userId, newName, newDate });
       return TodoRESTConverter.from(todo);
     } catch (e) {
       throw HttpErrorHandler.buildHttpExceptionFromDomainError(e);
@@ -98,7 +97,7 @@ export class TodoController {
   async createTask(@Request() req, @Param('id') id: number, @Body() input: AddTaskTodoInput): Promise<TodoREST> {
     try {
       const todoId = new TodoId(id);
-      const userId = new UserId(req.user.id);
+      const userId: UserId = req.user.id;
       const task = new Task(input.task);
       const todo = await this.addTaskToUseCase.run({ todoId, userId, task });
       return TodoRESTConverter.from(todo);
@@ -112,7 +111,7 @@ export class TodoController {
   async setPicture(@Request() req, @Param('id') id, @UploadedFile() file): Promise<TodoREST> {
     try {
       const todoId = new TodoId(id);
-      const userId = new UserId(req.user.id);
+      const userId: UserId = req.user.id;
       const picture = new Picture(file.filename);
       const todo = await this.setPictureUseCase.run({ todoId, userId, picture });
       return TodoRESTConverter.from(todo);

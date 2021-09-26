@@ -4,8 +4,6 @@ import * as bcrypt from 'bcrypt';
 
 @Table({ modelName: 'User' })
 export class UserDB extends Model<UserDB> {
-  // TODO:I create domain class for this one!
-
   @PrimaryKey
   @Column
   id: string;
@@ -25,9 +23,5 @@ export class UserDB extends Model<UserDB> {
       const salt = await bcrypt.genSalt();
       user.password = await bcrypt.hash(user.password, salt);
     }
-  }
-
-  async validatePassword(password: string): Promise<boolean> {
-    return bcrypt.compareSync(password, this.password);
   }
 }

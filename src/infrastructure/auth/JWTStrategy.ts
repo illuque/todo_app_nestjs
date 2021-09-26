@@ -2,8 +2,9 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JWTPayload } from './dto/JWTPayload';
-import { UserDB } from '../repositories/user/UserDB';
 import { UserRepositoryDB } from '../repositories/user/UserDBRepository';
+import { User } from '../../domain/user/User';
+import { UserId } from '../../domain/user/UserId';
 
 @Injectable()
 export class JWTStrategy extends PassportStrategy(Strategy) {
@@ -15,9 +16,9 @@ export class JWTStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JWTPayload): Promise<UserDB> {
-    // TODO:I change by domain or DTO object
-    const user = await this.userRepositoryDB.findOne(payload.userId);
+  async validate(payload: JWTPayload): Promise<User> {
+    const userId = new UserId(payload.userId);
+    const user = await this.userRepositoryDB.findOne(userId);
     if (!user) {
       throw new UnauthorizedException();
     }
