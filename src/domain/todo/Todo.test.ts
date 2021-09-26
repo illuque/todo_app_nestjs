@@ -1,8 +1,8 @@
 import { Todo } from './Todo';
-import { UserId } from '../vo/UserId';
+import { UserId } from '../user/UserId';
 import { InvalidTodoNameError } from '../../application/usecase/todo/common/errors/InvalidTodoNameError';
 import { InvalidTodoDateError } from '../../application/usecase/todo/common/errors/InvalidTodoDateError';
-import { Picture } from '../Picture';
+import { Picture } from '../picture/Picture';
 
 const validName = 'valid name';
 const invalidNameShort = 'short';

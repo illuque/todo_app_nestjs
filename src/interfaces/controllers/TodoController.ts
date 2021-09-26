@@ -1,15 +1,10 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
-  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
   Param,
   Patch,
   Post,
@@ -17,33 +12,26 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { extname } from 'path';
-import { diskStorage } from 'multer';
 import { AddTaskTodoInput } from './dto/todo/AddTaskTodoInput';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { PICTURES_PATH } from '../../infrastructure/file/FileConstants';
 import { CreateTodoUseCase } from '../../application/usecase/todo/CreateTodoUseCase';
 import { GetAllTodosByUserUseCase } from '../../application/usecase/todo/GetAllTodosByUserUseCase';
 import { DeleteTodoUseCase } from '../../application/usecase/todo/DeleteTodoUseCase';
 import { AddTaskToTodoUseCase } from '../../application/usecase/todo/AddTaskToTodoUseCase';
 import { UpdateTodoUseCase } from '../../application/usecase/todo/UpdateTodoUseCase';
 import { UploadPictureToTodoUseCase } from '../../application/usecase/todo/UploadPictureToTodoUseCase';
-import { UserId } from '../../domain/vo/UserId';
-import { TodoId } from '../../domain/vo/TodoId';
-import { Task } from '../../domain/Task';
-import { Picture } from '../../domain/Picture';
-import { BaseNotFoundError } from '../../application/usecase/common/errors/BaseNotFoundError';
-import { BaseForbiddenError } from '../../application/usecase/common/errors/BaseForbiddenError';
-import { BaseBadRequestError } from '../../application/usecase/common/errors/BaseBadRequestError';
-import { BaseGenericError } from '../../application/usecase/common/errors/BaseGenericError';
+import { UserId } from '../../domain/user/UserId';
+import { TodoId } from '../../domain/todo/TodoId';
+import { Task } from '../../domain/task/Task';
+import { Picture } from '../../domain/picture/Picture';
 import { CreateOrUpdateTodoInput } from './dto/todo/CreateOrUpdateTodoInput';
 import { TodoREST } from './dto/todo/TodoREST';
 import { TodoRESTConverter } from './converters/TodoConverter';
+import { PictureFileStore } from '../../infrastructure/file/PictureFileStore';
+import { HttpErrorHandler } from './common/HttpErrorHandler';
 
 @Controller('todos')
 export class TodoController {
-  private static readonly logger = new Logger(TodoController.name);
-
   constructor(
     private readonly createUseCase: CreateTodoUseCase,
     private readonly getAllByUserUseCase: GetAllTodosByUserUseCase,
@@ -64,7 +52,7 @@ export class TodoController {
       });
       return TodoRESTConverter.from(todo);
     } catch (e) {
-      throw TodoController.buildHttpException(e);
+      throw HttpErrorHandler.buildHttpExceptionFromDomainError(e);
     }
   }
 
@@ -75,7 +63,7 @@ export class TodoController {
       const todos = await this.getAllByUserUseCase.run(userId);
       return TodoRESTConverter.fromMulti(todos);
     } catch (e) {
-      throw TodoController.buildHttpException(e);
+      throw HttpErrorHandler.buildHttpExceptionFromDomainError(e);
     }
   }
 
@@ -87,7 +75,7 @@ export class TodoController {
       const userId = new UserId(req.user.id);
       await this.deleteUseCase.run({ todoId, userId });
     } catch (e) {
-      throw TodoController.buildHttpException(e);
+      throw HttpErrorHandler.buildHttpExceptionFromDomainError(e);
     }
   }
 
@@ -102,7 +90,7 @@ export class TodoController {
       });
       return TodoRESTConverter.from(todo);
     } catch (e) {
-      throw TodoController.buildHttpException(e);
+      throw HttpErrorHandler.buildHttpExceptionFromDomainError(e);
     }
   }
 
@@ -115,12 +103,12 @@ export class TodoController {
       const todo = await this.addTaskToUseCase.run({ todoId, userId, task });
       return TodoRESTConverter.from(todo);
     } catch (e) {
-      throw TodoController.buildHttpException(e);
+      throw HttpErrorHandler.buildHttpExceptionFromDomainError(e);
     }
   }
 
   @Post('/:id/picture')
-  @UseInterceptors(FileInterceptor('picture', { storage: buildDiskStorage() }))
+  @UseInterceptors(FileInterceptor('picture', { storage: PictureFileStore.buildDiskStorage() }))
   async setPicture(@Request() req, @Param('id') id, @UploadedFile() file): Promise<TodoREST> {
     try {
       const todoId = new TodoId(id);
@@ -129,43 +117,7 @@ export class TodoController {
       const todo = await this.setPictureUseCase.run({ todoId, userId, picture });
       return TodoRESTConverter.from(todo);
     } catch (e) {
-      throw TodoController.buildHttpException(e);
+      throw HttpErrorHandler.buildHttpExceptionFromDomainError(e);
     }
   }
-
-  private static buildHttpException(e: Error): Error {
-    if (e instanceof BaseNotFoundError) {
-      return new NotFoundException(e.message);
-    }
-    if (e instanceof BaseForbiddenError) {
-      return new ForbiddenException(e.message);
-    }
-    if (e instanceof BaseBadRequestError) {
-      return new BadRequestException(e.message);
-    }
-    if (e instanceof BaseGenericError) {
-      return new InternalServerErrorException(e.message);
-    }
-
-    this.logger.error('Unexpected e on controller', e.stack);
-    return new InternalServerErrorException('Unknown error happened');
-  }
-}
-
-// TODO:I mover a otra clase
-function getFilename() {
-  return (req, file, cb) => {
-    const randomName = Array(32)
-      .fill(null)
-      .map(() => Math.round(Math.random() * 16).toString(16))
-      .join('');
-    return cb(null, `${randomName}${extname(file.originalname)}`);
-  };
-}
-
-function buildDiskStorage() {
-  return diskStorage({
-    destination: `./${PICTURES_PATH}`,
-    filename: getFilename(),
-  });
 }

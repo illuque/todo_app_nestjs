@@ -1,6 +1,6 @@
 import { Todo } from '../../../../domain/todo/Todo';
-import { UserId } from '../../../../domain/vo/UserId';
-import { TodoId } from '../../../../domain/vo/TodoId';
+import { UserId } from '../../../../domain/user/UserId';
+import { TodoId } from '../../../../domain/todo/TodoId';
 import { TodoRepositoryDB } from '../../../../infrastructure/repositories/todo/TodoDBRepository';
 import { TodoUseCase } from './TodoUseCase';
 import { Logger } from '@nestjs/common';

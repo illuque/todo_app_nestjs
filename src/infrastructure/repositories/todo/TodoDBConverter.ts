@@ -1,9 +1,9 @@
-import { Picture } from '../../../domain/Picture';
-import { Task } from '../../../domain/Task';
+import { Picture } from '../../../domain/picture/Picture';
+import { Task } from '../../../domain/task/Task';
 import { Todo } from '../../../domain/todo/Todo';
 import { TodoDB } from './TodoDB';
-import { UserId } from '../../../domain/vo/UserId';
-import { TodoId } from '../../../domain/vo/TodoId';
+import { UserId } from '../../../domain/user/UserId';
+import { TodoId } from '../../../domain/todo/TodoId';
 
 export class TodoDBConverter {
   static fromDB(todoDB: TodoDB): Todo {

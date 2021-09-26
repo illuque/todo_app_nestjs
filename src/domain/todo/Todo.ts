@@ -1,7 +1,7 @@
-import { UserId } from '../vo/UserId';
-import { TodoId } from '../vo/TodoId';
-import { Picture } from '../Picture';
-import { Task } from '../Task';
+import { UserId } from '../user/UserId';
+import { TodoId } from './TodoId';
+import { Picture } from '../picture/Picture';
+import { Task } from '../task/Task';
 import { InvalidTodoNameError } from '../../application/usecase/todo/common/errors/InvalidTodoNameError';
 import { InvalidTodoDateError } from '../../application/usecase/todo/common/errors/InvalidTodoDateError';
 import { DuplicatedTaskError } from '../../application/usecase/todo/common/errors/DuplicatedTaskError';

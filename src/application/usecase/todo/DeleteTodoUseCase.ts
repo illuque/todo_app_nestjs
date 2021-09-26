@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BaseOwnedTodoUseCase } from './common/BaseOwnedTodoUseCase';
-import { TodoId } from '../../../domain/vo/TodoId';
-import { UserId } from '../../../domain/vo/UserId';
+import { TodoId } from '../../../domain/todo/TodoId';
+import { UserId } from '../../../domain/user/UserId';
 import { TodoRepositoryDB } from '../../../infrastructure/repositories/todo/TodoDBRepository';
 import { TodoUnknownError } from './common/errors/TodoUnknownError';
 

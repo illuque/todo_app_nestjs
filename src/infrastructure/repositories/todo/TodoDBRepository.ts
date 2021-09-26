@@ -4,9 +4,9 @@ import { TodoDB } from './TodoDB';
 import { TODO_REPOSITORY } from '../common/DBConstants';
 import { RepositoryDB } from '../../../application/ports/RepositoryService';
 import sequelize, { ValidationError } from 'sequelize';
-import { TodoId } from '../../../domain/vo/TodoId';
-import { UserId } from '../../../domain/vo/UserId';
-import { Task } from '../../../domain/Task';
+import { TodoId } from '../../../domain/todo/TodoId';
+import { UserId } from '../../../domain/user/UserId';
+import { Task } from '../../../domain/task/Task';
 import { Todo } from '../../../domain/todo/Todo';
 import { TodoDBConverter } from './TodoDBConverter';
 

@@ -1,4 +1,4 @@
-import { NumberValueObject } from './common/NumberValueObject';
+import { NumberValueObject } from '../common/NumberValueObject';
 
 export class TodoId extends NumberValueObject {
   toString(): string {

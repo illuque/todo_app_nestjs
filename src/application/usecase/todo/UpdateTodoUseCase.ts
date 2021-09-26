@@ -2,10 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { TodoRepositoryDB } from '../../../infrastructure/repositories/todo/TodoDBRepository';
 import { Todo } from '../../../domain/todo/Todo';
 import { BaseOwnedTodoUseCase } from './common/BaseOwnedTodoUseCase';
-import { TodoId } from '../../../domain/vo/TodoId';
-import { UserId } from '../../../domain/vo/UserId';
+import { TodoId } from '../../../domain/todo/TodoId';
+import { UserId } from '../../../domain/user/UserId';
 import { TodoUnknownError } from './common/errors/TodoUnknownError';
-import { Picture } from '../../../domain/Picture';
 
 @Injectable()
 export class UpdateTodoUseCase extends BaseOwnedTodoUseCase<Input, Todo> {
