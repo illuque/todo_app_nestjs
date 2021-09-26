@@ -1,12 +1,12 @@
-import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
-import { AuthProvider } from '../../infrastructure/auth/AuthProvider';
+import { Body, Controller, Inject, Post, UnauthorizedException } from '@nestjs/common';
 import { LoginInput } from './dto/LoginInput';
 import { Public } from '../../infrastructure/auth/AuthPublicDecorator';
 import { UserId } from '../../domain/user/UserId';
+import { AuthProvider } from './ports/AuthProvider';
 
 @Controller('login')
 export class AuthController {
-  constructor(private authService: AuthProvider) {}
+  constructor(@Inject('AuthProvider') private authService: AuthProvider) {}
 
   @Public()
   @Post()
@@ -15,11 +15,11 @@ export class AuthController {
 
     const userId = new UserId(uid);
 
-    const valid = await this.authService.validateUser(userId, password);
-    if (!valid) {
+    const authorizerResponse = await this.authService.authorizeUser(userId, password);
+    if (!authorizerResponse) {
       throw new UnauthorizedException();
     }
 
-    return await this.authService.generateAccessToken(userId);
+    return authorizerResponse;
   }
 }
