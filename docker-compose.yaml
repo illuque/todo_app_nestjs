@@ -1,23 +1,24 @@
-version: "3"
+version: "3.3"
 services:
   postgres:
     container_name: postgres
     image: postgres:latest
+    restart: unless-stopped
     ports:
       - "5432:5432"
     volumes:
-      - ~/data/postgres:/data/postgres
-      - ./src/database/migrations/create_db.sql:/docker-entrypoint-initdb.d/create_db.sql
+      - todo_app-db:/data/postgres
     env_file:
       - docker.env
     networks:
-      - postgres
+      - todo_app_nw
 
   pgadmin:
     links:
       - postgres:postgres
     container_name: pgadmin
     image: dpage/pgadmin4
+    restart: unless-stopped
     ports:
       - "8080:80"
     volumes:
@@ -25,10 +26,28 @@ services:
     env_file:
       - docker.env
     networks:
+      - todo_app_nw
+
+  todo_app:
+    image: illuque/todo_app:dev
+    container_name: todo_app
+    restart: unless-stopped
+    env_file:
+      - docker.env
+    ports:
+      - "3001:3000"
+    volumes:
+      - .:/usr/src/app
+      - todo_app-node_modules:/usr/src/app/node_modules
+    networks:
+      - todo_app_nw
+    depends_on:
       - postgres
 
 networks:
-  postgres:
+  todo_app_nw:
     driver: bridge
 
-# TODO:I docker-compose should also run the app!!!
+volumes:
+  todo_app-db:
+  todo_app-node_modules:

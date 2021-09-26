@@ -28,8 +28,20 @@
 
 ## Installation
 
+### Build for local development
+
+Install all dependencies and compile the Typescript code
+
 ```bash
-$ npm install
+$ npm run build
+```
+
+### Build for Docker development
+
+Install all dependencies, compile the Typescript code and generate Docker Image
+
+```bash
+$ npm run build:docker
 ```
 
 ## Running the app
@@ -40,6 +52,10 @@ $ npm run start
 
 # watch mode
 $ npm run start:dev
+
+# docker mode
+
+$ npm run start:docker
 
 # production mode
 $ npm run start:prod
