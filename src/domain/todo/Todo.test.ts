@@ -2,7 +2,6 @@ import { Todo } from './Todo';
 import { UserId } from '../user/UserId';
 import { InvalidTodoNameError } from '../../application/usecase/todo/common/errors/InvalidTodoNameError';
 import { InvalidTodoDateError } from '../../application/usecase/todo/common/errors/InvalidTodoDateError';
-import { Picture } from '../picture/Picture';
 
 const validName = 'valid name';
 const invalidNameShort = 'short';
@@ -12,8 +11,6 @@ const validDate = new Date('2021-09-24');
 const invalidDate = new Date('2021-09-25');
 
 const userId = new UserId('userId');
-
-// TODO:I Ensure integration tests that ensure that you can only get TO-DOs that are yours.
 
 describe('Todo', () => {
   describe('CreateNew', () => {
