@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -109,6 +110,9 @@ export class TodoController {
   @Post('/:id/picture')
   @UseInterceptors(FileInterceptor('picture', { storage: PictureFileStore.buildDiskStorage() }))
   async setPicture(@Request() req, @Param('id') id, @UploadedFile() file): Promise<TodoREST> {
+    if (!file?.filename) {
+      throw new BadRequestException('A picture should be provided');
+    }
     try {
       const todoId = new TodoId(id);
       const userId: UserId = req.user.id;

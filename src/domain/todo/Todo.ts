@@ -10,8 +10,8 @@ export class Todo {
   private static readonly SATURDAY_DAY_OF_WEEK = 6;
   private static readonly SUNDAY_DAY_OF_WEEK = 0;
 
-  private static readonly NAME_MIN_CHARS = 8;
-  private static readonly NAME_MAX_CHARS = 16;
+  public static readonly NAME_MIN_CHARS = 8;
+  public static readonly NAME_MAX_CHARS = 16;
 
   readonly id: TodoId;
   private _name: string;
@@ -89,7 +89,9 @@ export class Todo {
   private validateName(name: string) {
     const validName = name.length >= Todo.NAME_MIN_CHARS && name.length <= Todo.NAME_MAX_CHARS;
     if (!validName) {
-      throw new InvalidTodoNameError('Invalid Todo name: must have between 8 and 16 characters');
+      throw new InvalidTodoNameError(
+        `Invalid Todo name: must have between ${Todo.NAME_MIN_CHARS} and ${Todo.NAME_MAX_CHARS} characters`,
+      );
     }
   }
 

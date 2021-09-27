@@ -12,8 +12,8 @@ export class CreateTodoUseCase implements TodoUseCase<Input, Todo> {
   constructor(private readonly todoRepository: TodoRepositoryDB) {}
 
   async run(input: Input): Promise<Todo> {
+    const todo = Todo.createNew(input.name, input.date, input.userId);
     try {
-      const todo = Todo.createNew(input.name, input.date, input.userId);
       return await this.todoRepository.create(todo);
     } catch (e) {
       this.logger.error('Error creating Todo', e.stack);

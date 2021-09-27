@@ -27,7 +27,7 @@ export class HttpErrorHandler {
       return new InternalServerErrorException(e.message);
     }
 
-    this.logger.error('Unexpected e on controller', e.stack);
+    this.logger.error('Unexpected error on controller', e.stack);
     return new InternalServerErrorException('Unknown error happened');
   }
 }

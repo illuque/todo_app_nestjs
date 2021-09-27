@@ -1,5 +1,6 @@
 import { Todo } from '../../../../domain/todo/Todo';
 import { TodoREST } from './TodoREST';
+import { PICTURES_PATH } from '../../../../infrastructure/file/FileConstants';
 
 export class TodoRESTConverter {
   static from(todo: Todo): TodoREST {
@@ -7,7 +8,7 @@ export class TodoRESTConverter {
       todo.id.value,
       todo.name,
       todo.date,
-      todo.picture.value,
+      todo.picture.value ? `/${PICTURES_PATH}/${todo.picture.value}` : null,
       todo.subTasks.map((t) => t.value),
     );
   }

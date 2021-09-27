@@ -1,4 +1,6 @@
+import { IsNotEmpty } from 'class-validator';
+
 export class AddTaskTodoInput {
-  // TODO:I express-validations a todos!
+  @IsNotEmpty()
   task: string;
 }
