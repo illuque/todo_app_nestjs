@@ -2,17 +2,16 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { TodoDB } from './TodoDB';
 import { TODO_REPOSITORY } from '../common/DBConstants';
-import { RepositoryDB } from '../../../application/ports/RepositoryService';
 import sequelize, { ValidationError } from 'sequelize';
 import { TodoId } from '../../../domain/todo/TodoId';
 import { UserId } from '../../../domain/user/UserId';
 import { Task } from '../../../domain/task/Task';
 import { Todo } from '../../../domain/todo/Todo';
 import { TodoDBConverter } from './TodoDBConverter';
+import { TodoRepository } from '../../../application/ports/TodoRepository';
 
 @Injectable()
-export class TodoRepositoryDB implements RepositoryDB<TodoId, Todo> {
-  // TODO:I extract interface
+export class TodoRepositoryDB implements TodoRepository {
   constructor(
     @Inject(TODO_REPOSITORY)
     private readonly todoRepository: typeof TodoDB,
@@ -31,7 +30,6 @@ export class TodoRepositoryDB implements RepositoryDB<TodoId, Todo> {
 
   async findAllByCreator(userId: UserId): Promise<Todo[]> {
     const todosDB = await TodoDB.findAll({ where: { createdBy: userId.value } });
-    // TODO:I check if when none found it returns an array
     return todosDB && TodoDBConverter.fromDBMulti(todosDB);
   }
 

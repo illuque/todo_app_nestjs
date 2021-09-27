@@ -2,14 +2,13 @@ import { Inject, Injectable, NotImplementedException } from '@nestjs/common';
 
 import { UserDB } from './UserDB';
 import { USER_REPOSITORY } from '../common/DBConstants';
-import { RepositoryDB } from '../../../application/ports/RepositoryService';
 import { User } from '../../../domain/user/User';
 import { UserDBConverter } from './UserDBConverter';
 import { UserId } from '../../../domain/user/UserId';
+import { UserRepository } from '../../../application/ports/UserRepository';
 
 @Injectable()
-export class UserRepositoryDB implements RepositoryDB<UserId, User> {
-  // TODO:I extract interface
+export class UserRepositoryDB implements UserRepository {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: typeof UserDB,
