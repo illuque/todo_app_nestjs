@@ -12,23 +12,23 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { AddTaskTodoInput } from './dto/todo/AddTaskTodoInput';
+import { AddTaskTodoInput } from './dto/AddTaskTodoInput';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CreateTodoUseCase } from '../../application/usecase/todo/CreateTodoUseCase';
-import { GetAllTodosByUserUseCase } from '../../application/usecase/todo/GetAllTodosByUserUseCase';
-import { DeleteTodoUseCase } from '../../application/usecase/todo/DeleteTodoUseCase';
-import { AddTaskToTodoUseCase } from '../../application/usecase/todo/AddTaskToTodoUseCase';
-import { UpdateTodoUseCase } from '../../application/usecase/todo/UpdateTodoUseCase';
-import { UploadPictureToTodoUseCase } from '../../application/usecase/todo/UploadPictureToTodoUseCase';
-import { UserId } from '../../domain/user/UserId';
-import { TodoId } from '../../domain/todo/TodoId';
-import { Task } from '../../domain/task/Task';
-import { Picture } from '../../domain/picture/Picture';
-import { CreateOrUpdateTodoInput } from './dto/todo/CreateOrUpdateTodoInput';
-import { TodoREST } from './dto/todo/TodoREST';
-import { TodoRESTConverter } from './converters/TodoConverter';
-import { PictureFileStore } from '../../infrastructure/file/PictureFileStore';
-import { HttpErrorHandler } from './common/HttpErrorHandler';
+import { CreateTodoUseCase } from '../../../application/usecase/todo/CreateTodoUseCase';
+import { GetAllTodosByUserUseCase } from '../../../application/usecase/todo/GetAllTodosByUserUseCase';
+import { DeleteTodoUseCase } from '../../../application/usecase/todo/DeleteTodoUseCase';
+import { AddTaskToTodoUseCase } from '../../../application/usecase/todo/AddTaskToTodoUseCase';
+import { UpdateTodoUseCase } from '../../../application/usecase/todo/UpdateTodoUseCase';
+import { UploadPictureToTodoUseCase } from '../../../application/usecase/todo/UploadPictureToTodoUseCase';
+import { UserId } from '../../../domain/user/UserId';
+import { TodoId } from '../../../domain/todo/TodoId';
+import { Task } from '../../../domain/task/Task';
+import { Picture } from '../../../domain/picture/Picture';
+import { CreateOrUpdateTodoInput } from './dto/CreateOrUpdateTodoInput';
+import { TodoREST } from './dto/TodoREST';
+import { TodoRESTConverter } from './dto/TodoConverter';
+import { PictureFileStore } from '../../../infrastructure/file/PictureFileStore';
+import { HttpErrorHandler } from '../common/HttpErrorHandler';
 
 @Controller('todos')
 export class TodoController {

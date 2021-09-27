@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JWTPayload } from './dto/JWTPayload';
 import { UserRepositoryDB } from '../repositories/user/UserDBRepository';
 import { UserId } from '../../domain/user/UserId';
-import { AuthProvider } from '../../interfaces/controllers/ports/AuthProvider';
+import { AuthProvider } from '../../interfaces/controllers/auth/ports/AuthProvider';
 
 @Injectable()
 export class JWTAuthProvider implements AuthProvider {

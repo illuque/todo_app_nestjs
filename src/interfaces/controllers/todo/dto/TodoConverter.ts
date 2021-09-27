@@ -1,5 +1,5 @@
-import { Todo } from '../../../domain/todo/Todo';
-import { TodoREST } from '../dto/todo/TodoREST';
+import { Todo } from '../../../../domain/todo/Todo';
+import { TodoREST } from './TodoREST';
 
 export class TodoRESTConverter {
   static from(todo: Todo): TodoREST {

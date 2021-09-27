@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { JWTAuthProvider } from '../infrastructure/auth/JWTAuthProvider';
 import { ConfigModule } from '@nestjs/config';
-import { AuthController } from '../interfaces/controllers/AuthController';
+import { AuthController } from '../interfaces/controllers/auth/AuthController';
 import { UserModule } from './UserModule';
 import { PassportModule } from '@nestjs/passport';
 import { JWTStrategy } from '../infrastructure/auth/JWTStrategy';

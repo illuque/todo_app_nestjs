@@ -9,10 +9,7 @@ export class AuthGuardWithExceptions extends AuthGuard('jwt') {
   }
 
   canActivate(context: ExecutionContext) {
-    const isNoAuth = this.reflector.get<boolean>(
-      'no-auth',
-      context.getHandler(),
-    );
+    const isNoAuth = this.reflector.get<boolean>('no-auth', context.getHandler());
 
     if (isNoAuth) {
       return true;

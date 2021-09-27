@@ -1,7 +1,7 @@
 import { Body, Controller, Inject, Post, UnauthorizedException } from '@nestjs/common';
-import { LoginInput } from './dto/LoginInput';
-import { Public } from '../../infrastructure/auth/AuthPublicDecorator';
-import { UserId } from '../../domain/user/UserId';
+import { LoginInput } from './LoginInput';
+import { Public } from '../../../infrastructure/auth/AuthPublicDecorator';
+import { UserId } from '../../../domain/user/UserId';
 import { AuthProvider } from './ports/AuthProvider';
 
 @Controller('login')
