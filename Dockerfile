@@ -1,19 +1,23 @@
-FROM node:14
+FROM node:14 AS builder
 
-# Create app directory
-WORKDIR /usr/src/app
+WORKDIR /home
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-COPY package*.json ./
-
+# Install the dependencies required to generate the production code
+COPY ./package.json .
+COPY ./package-lock.json .
 RUN npm install
-# If you are building your code for production
-# RUN npm ci --only=production
 
-# Bundle app source
-COPY ./dist .
+COPY . /home
 
-EXPOSE 3000
-CMD [ "node", "dist/src/Main.js" ]
+# Generate the deployable code and install only production dependencies
+RUN npm run build && rm -r node_modules && npm install --production
+
+# Build an image with only the production code and dependencies
+FROM node:14-alpine
+
+WORKDIR /app
+COPY --from=builder /home/dist ./dist
+COPY --from=builder /home/node_modules ./node_modules
+COPY --from=builder /home/package.json /home/package-lock.json ./
+
+CMD ["npm", "run", "start:prod"]

@@ -29,16 +29,14 @@ services:
       - todo_app_nw
 
   todo_app:
-    image: illuque/todo_app:dev
-    container_name: todo_app
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: unless-stopped
     env_file:
       - docker.env
     ports:
       - "3001:3000"
-    volumes:
-      - .:/usr/src/app
-      - todo_app-node_modules:/usr/src/app/node_modules
     networks:
       - todo_app_nw
     depends_on:
@@ -50,4 +48,3 @@ networks:
 
 volumes:
   todo_app-db:
-  todo_app-node_modules:
